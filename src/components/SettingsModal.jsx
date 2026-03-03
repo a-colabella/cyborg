@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { load } from '@tauri-apps/plugin-store';
+import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 
 const PROVIDERS = [
   { id: 'claude', name: 'Claude', placeholder: 'sk-ant-...' },
@@ -20,6 +21,8 @@ export default function SettingsModal({ onClose }) {
   const [supabaseKey, setSupabaseKey] = useState('');
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [apiKeyVisible, setApiKeyVisible] = useState(false);
+  const [supabaseKeyVisible, setSupabaseKeyVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -110,15 +113,29 @@ export default function SettingsModal({ onClose }) {
               <label className="block text-xs font-medium text-text-secondary mb-2">
                 {p.name} API Key
               </label>
-              <input
-                type="password"
-                value={apiKeys[p.id]}
-                onChange={(e) =>
-                  setApiKeys((prev) => ({ ...prev, [p.id]: e.target.value }))
-                }
-                placeholder={p.placeholder}
-                className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={apiKeyVisible ? 'text' : 'password'}
+                  value={apiKeys[p.id]}
+                  onChange={(e) =>
+                    setApiKeys((prev) => ({ ...prev, [p.id]: e.target.value }))
+                  }
+                  placeholder={p.placeholder}
+                  className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 pr-9 text-sm text-text-primary outline-none focus:border-accent transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setApiKeyVisible((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label={apiKeyVisible ? 'Hide API key' : 'Show API key'}
+                >
+                  {apiKeyVisible ? (
+                    <EyeSlashIcon size={18} weight="regular" />
+                  ) : (
+                    <EyeIcon size={18} weight="regular" />
+                  )}
+                </button>
+              </div>
               <div className="mt-2">
                 <label className="block text-xs font-medium text-text-secondary mb-1">
                   Model
@@ -153,13 +170,27 @@ export default function SettingsModal({ onClose }) {
                 placeholder="https://your-project.supabase.co"
                 className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
               />
-              <input
-                type="password"
-                value={supabaseKey}
-                onChange={(e) => setSupabaseKey(e.target.value)}
-                placeholder="Supabase anon key"
-                className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={supabaseKeyVisible ? 'text' : 'password'}
+                  value={supabaseKey}
+                  onChange={(e) => setSupabaseKey(e.target.value)}
+                  placeholder="Supabase anon key"
+                  className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 pr-9 text-sm text-text-primary outline-none focus:border-accent transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSupabaseKeyVisible((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label={supabaseKeyVisible ? 'Hide key' : 'Show key'}
+                >
+                  {supabaseKeyVisible ? (
+                    <EyeSlashIcon size={18} weight="regular" />
+                  ) : (
+                    <EyeIcon size={18} weight="regular" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

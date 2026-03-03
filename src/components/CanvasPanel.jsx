@@ -84,7 +84,8 @@ export default function CanvasPanel({ componentCode }) {
         </div>
         <button
           onClick={() => setShowSaveDialog(true)}
-          disabled={!componentCode || saving}
+          disabled={componentCode == null || saving}
+          hidden={componentCode == null}
           className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <FloppyDiskIcon size={18} weight="regular" />
