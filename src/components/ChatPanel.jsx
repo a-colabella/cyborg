@@ -3,21 +3,16 @@ import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import SavedAppsMenu from './SavedAppsMenu';
-import { AppWindowIcon, ChatTextIcon, GearIcon } from '@phosphor-icons/react';
+import { ChatTextIcon } from '@phosphor-icons/react';
 import { SYSTEM_PROMPT } from '../systemPrompt';
-import logo from '../assets/app-icon.svg';
 
 export default function ChatPanel({
   messages,
   setMessages,
   onComponentUpdate,
-  onOpenSettings,
   isLoading,
   setIsLoading,
 }) {
-  const [savedAppsOpen, setSavedAppsOpen] = useState(false);
-
   const handleSend = async (text) => {
     const userMessage = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
@@ -35,7 +30,7 @@ export default function ChatPanel({
           {
             role: 'assistant',
             content:
-              'Please set your API key in Settings first. Click the **Settings** button above to configure your AI provider.',
+              'Please set your API key in Settings first. Use the **Settings** page in the sidebar to configure your AI provider.',
           },
         ]);
         setIsLoading(false);
@@ -74,39 +69,11 @@ export default function ChatPanel({
 
   return (
     <div className="flex flex-col h-full bg-bg-primary">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h1 className="text-sm font-semibold text-text-primary tracking-wide">
-          <img src={logo} alt="Cyborg" width={32} height={32} className="brightness-0 invert" />
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSavedAppsOpen(!savedAppsOpen)}
-            className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
-          >
-            <AppWindowIcon size={18} weight="regular" />
-            <span>My Apps</span>
-          </button>
-          <button
-            onClick={onOpenSettings}
-            title="Settings"
-            className="p-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
-          >
-            <GearIcon size={18} weight="regular" />
-          </button>
-        </div>
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <ChatTextIcon size={18} weight="regular" className="text-text-secondary" />
+        <span className="text-sm font-semibold text-text-primary">Chat</span>
       </div>
-
-      {/* Saved Apps Dropdown */}
-      {savedAppsOpen && (
-        <SavedAppsMenu
-          onSelect={(code) => {
-            onComponentUpdate(code);
-            setSavedAppsOpen(false);
-          }}
-          onClose={() => setSavedAppsOpen(false)}
-        />
-      )}
 
       {/* Message List */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">

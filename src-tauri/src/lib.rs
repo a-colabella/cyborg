@@ -12,6 +12,7 @@ pub fn run() {
             commands::apps::load_app,
             commands::apps::list_apps,
             commands::apps::delete_app,
+            commands::apps::get_app_image,
             commands::settings::get_settings,
             commands::settings::set_settings,
             commands::database::init_db,

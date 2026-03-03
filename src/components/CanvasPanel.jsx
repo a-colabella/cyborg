@@ -1,72 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ComponentRenderer from './ComponentRenderer';
+import SaveDialog from './SaveDialog';
 import { CoffeeIcon, FloppyDiskIcon, PaintBrushIcon } from '@phosphor-icons/react';
-
-function SaveDialog({ onSave, onCancel }) {
-  const [name, setName] = useState('');
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const trimmed = name.trim();
-    if (trimmed) onSave(trimmed);
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      onClick={(e) => e.target === e.currentTarget && onCancel()}
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="bg-bg-secondary border border-border rounded-sm w-[360px] p-6"
-      >
-        <h3 className="text-sm font-semibold text-text-primary mb-4">
-          Save App
-        </h3>
-        <input
-          ref={inputRef}
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter a name for this app..."
-          className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors mb-4"
-        />
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 rounded-sm text-sm text-text-secondary hover:text-text-primary transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={!name.trim()}
-            className="px-4 py-2 rounded-sm bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-40"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 export default function CanvasPanel({ componentCode }) {
   const [saving, setSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-  const handleSave = async (name) => {
+  const handleSave = async ({ name, description, icon, imageData }) => {
     setShowSaveDialog(false);
     setSaving(true);
     try {
-      await invoke('save_app', { name, code: componentCode });
+      await invoke('save_app', { name, code: componentCode, description, icon, imageData });
     } catch (err) {
       console.error('Failed to save:', err);
     } finally {
@@ -79,7 +25,7 @@ export default function CanvasPanel({ componentCode }) {
       {/* Canvas Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <PaintBrushIcon size={18} weight="regular" />
+          <PaintBrushIcon size={18} weight="regular" className="text-text-secondary" />
           <span className="text-sm font-semibold text-text-primary">Canvas</span>
         </div>
         <button
