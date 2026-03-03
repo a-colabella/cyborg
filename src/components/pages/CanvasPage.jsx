@@ -7,6 +7,8 @@ export default function CanvasPage({
   setMessages,
   currentComponent,
   setCurrentComponent,
+  currentAppInfo,
+  setCurrentAppInfo,
   isLoading,
   setIsLoading,
 }) {
@@ -53,7 +55,15 @@ export default function CanvasPage({
     >
       {/* Canvas Panel — LEFT */}
       <div style={{ width: `${splitPosition}%` }} className="h-full overflow-hidden">
-        <CanvasPanel componentCode={currentComponent} />
+        <CanvasPanel
+          componentCode={currentComponent}
+          appInfo={currentAppInfo}
+          onAppInfoUpdate={setCurrentAppInfo}
+          onClear={() => {
+            setCurrentComponent(null);
+            setCurrentAppInfo(null);
+          }}
+        />
       </div>
 
       {/* Draggable Divider */}

@@ -11,7 +11,7 @@ RULES FOR GENERATED COMPONENTS:
 - Do NOT use import statements - all dependencies are pre-injected into scope
 - Use inline styles for all styling (Tailwind is NOT available in the component sandbox)
 - The component must be completely self-contained
-- Always use a dark theme (background: #1a1a1a, text: #e0e0e0, accent: #6366f1)
+- Use a dark theme (background: #1a1a1a, text: #e0e0e0)
 - Keep it clean and visually polished
 
 EXAMPLE FORMAT:

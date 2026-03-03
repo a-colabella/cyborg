@@ -8,10 +8,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState('canvas');
   const [messages, setMessages] = useState([]);
   const [currentComponent, setCurrentComponent] = useState(null);
+  const [currentAppInfo, setCurrentAppInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLoadApp = (code) => {
+  const handleLoadApp = (code, appInfo) => {
     setCurrentComponent(code);
+    setCurrentAppInfo(appInfo);
     setCurrentPage('canvas');
   };
 
@@ -26,6 +28,8 @@ function App() {
             setMessages={setMessages}
             currentComponent={currentComponent}
             setCurrentComponent={setCurrentComponent}
+            currentAppInfo={currentAppInfo}
+            setCurrentAppInfo={setCurrentAppInfo}
             isLoading={isLoading}
             setIsLoading={setIsLoading}
           />

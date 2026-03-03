@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import { UploadSimpleIcon, ImageIcon } from '@phosphor-icons/react';
-import PhosphorIcon, { ICON_MAP, ICON_NAMES } from './PhosphorIcon';
+import { UploadSimpleIcon } from '@phosphor-icons/react';
+import PhosphorIcon, { ICON_NAMES } from './PhosphorIcon';
 
-export default function SaveDialog({ onSave, onCancel }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [activeTab, setActiveTab] = useState('icon');
-  const [selectedIcon, setSelectedIcon] = useState('Cube');
-  const [imagePreview, setImagePreview] = useState(null);
+export default function SaveDialog({ onSave, onCancel, editMode = false, initialData = {} }) {
+  const [name, setName] = useState(initialData.name || '');
+  const [description, setDescription] = useState(initialData.description || '');
+  const [activeTab, setActiveTab] = useState(initialData.imagePreview ? 'image' : 'icon');
+  const [selectedIcon, setSelectedIcon] = useState(initialData.icon || 'Cube');
+  const [imagePreview, setImagePreview] = useState(initialData.imagePreview || null);
   const [imageData, setImageData] = useState(null);
   const nameInputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -79,7 +79,9 @@ export default function SaveDialog({ onSave, onCancel }) {
         className="bg-bg-secondary border border-border rounded-lg w-[480px] max-h-[85vh] overflow-y-auto"
       >
         <div className="px-6 pt-6 pb-4">
-          <h3 className="text-base font-semibold text-text-primary mb-4">Save App</h3>
+          <h3 className="text-base font-semibold text-text-primary mb-4">
+            {editMode ? 'Edit App' : 'Save App'}
+          </h3>
 
           {/* Name */}
           <label className="block text-xs font-medium text-text-secondary mb-1.5">Name</label>
@@ -88,7 +90,7 @@ export default function SaveDialog({ onSave, onCancel }) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="My awesome app..."
+            placeholder="My useful app..."
             className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors mb-4"
           />
 
@@ -205,7 +207,7 @@ export default function SaveDialog({ onSave, onCancel }) {
             disabled={!name.trim()}
             className="px-4 py-2 rounded-sm bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-40"
           >
-            Save
+            {editMode ? 'Update' : 'Save'}
           </button>
         </div>
       </form>

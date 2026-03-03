@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { AppWindowIcon, RocketLaunchIcon, TrashIcon } from '@phosphor-icons/react';
+import { AppWindowIcon, RocketLaunchIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import PhosphorIcon from '../PhosphorIcon';
+import SaveDialog from '../SaveDialog';
 
 export default function MyAppsPage({ onLoadApp }) {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imageCache, setImageCache] = useState({});
+  const [editingApp, setEditingApp] = useState(null);
+  const [deletingApp, setDeletingApp] = useState(null);
 
   useEffect(() => {
     loadApps();
@@ -38,10 +41,10 @@ export default function MyAppsPage({ onLoadApp }) {
     }
   };
 
-  const handleLoad = async (filename) => {
+  const handleLoad = async (app) => {
     try {
-      const code = await invoke('load_app', { filename });
-      onLoadApp(code);
+      const code = await invoke('load_app', { filename: app.filename });
+      onLoadApp(code, app);
     } catch (err) {
       console.error('Failed to load app:', err);
     }
@@ -58,6 +61,44 @@ export default function MyAppsPage({ onLoadApp }) {
       });
     } catch (err) {
       console.error('Failed to delete app:', err);
+    } finally {
+      setDeletingApp(null);
+    }
+  };
+
+  const handleEditMetadata = async ({ name, description, icon, imageData }) => {
+    const app = editingApp;
+    setEditingApp(null);
+    try {
+      await invoke('update_app_metadata', {
+        filename: app.filename,
+        displayName: name,
+        description,
+        icon,
+        imageData,
+      });
+
+      // If a new image was uploaded, reload it
+      if (imageData) {
+        const stem = app.filename.replace('.jsx', '');
+        try {
+          const base64 = await invoke('get_app_image', { imagePath: `images/${stem}.png` });
+          setImageCache((prev) => ({ ...prev, [app.filename]: `data:image/png;base64,${base64}` }));
+        } catch { /* ignore */ }
+      } else if (icon) {
+        // Switched from image to icon — clear the cached image
+        setImageCache((prev) => {
+          const next = { ...prev };
+          delete next[app.filename];
+          return next;
+        });
+      }
+
+      // Refresh the apps list to pick up updated metadata
+      const result = await invoke('list_apps');
+      setApps(result);
+    } catch (err) {
+      console.error('Failed to update metadata:', err);
     }
   };
 
@@ -95,25 +136,50 @@ export default function MyAppsPage({ onLoadApp }) {
                 key={app.filename}
                 app={app}
                 imageUrl={imageCache[app.filename]}
-                onLoad={() => handleLoad(app.filename)}
-                onDelete={() => handleDelete(app.filename)}
+                onLoad={() => handleLoad(app)}
+                onEdit={() => setEditingApp(app)}
+                onDelete={() => setDeletingApp(app)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Edit Metadata Dialog */}
+      {editingApp && (
+        <SaveDialog
+          editMode
+          initialData={{
+            name: editingApp.metadata?.display_name || editingApp.name,
+            description: editingApp.metadata?.description || '',
+            icon: editingApp.metadata?.icon || 'Cube',
+            imagePreview: imageCache[editingApp.filename] || null,
+          }}
+          onSave={handleEditMetadata}
+          onCancel={() => setEditingApp(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingApp && (
+        <DeleteConfirmDialog
+          appName={deletingApp.metadata?.display_name || deletingApp.name}
+          onConfirm={() => handleDelete(deletingApp.filename)}
+          onCancel={() => setDeletingApp(null)}
+        />
+      )}
     </div>
   );
 }
 
-function AppCard({ app, imageUrl, onLoad, onDelete }) {
+function AppCard({ app, imageUrl, onLoad, onEdit, onDelete }) {
   const displayName = app.metadata?.display_name || app.name;
   const description = app.metadata?.description;
   const iconName = app.metadata?.icon;
 
   return (
     <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden hover:border-accent/50 transition-colors group">
-      {/* Image / Icon area */}
+      {/* Image / Icon area — clicking opens the app */}
       <div
         className="h-40 bg-bg-tertiary flex items-center justify-center cursor-pointer"
         onClick={onLoad}
@@ -130,7 +196,7 @@ function AppCard({ app, imageUrl, onLoad, onDelete }) {
         )}
       </div>
 
-      {/* Info */}
+      {/* Info — clicking opens the app */}
       <div className="p-3 cursor-pointer" onClick={onLoad}>
         <h3 className="text-sm font-medium text-text-primary truncate">{displayName}</h3>
         {description && (
@@ -141,10 +207,11 @@ function AppCard({ app, imageUrl, onLoad, onDelete }) {
       {/* Actions */}
       <div className="flex border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
         <button
-          onClick={onLoad}
-          className="flex-1 py-2 text-xs text-text-secondary hover:text-accent transition-colors"
+          onClick={onEdit}
+          className="flex items-center justify-center gap-1 flex-1 py-2 text-xs text-text-secondary hover:text-accent transition-colors"
         >
-          Open
+          <PencilSimpleIcon size={14} />
+          Edit
         </button>
         <div className="w-px bg-border" />
         <button
@@ -154,6 +221,36 @@ function AppCard({ app, imageUrl, onLoad, onDelete }) {
           <TrashIcon size={14} />
           Delete
         </button>
+      </div>
+    </div>
+  );
+}
+
+function DeleteConfirmDialog({ appName, onConfirm, onCancel }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      onClick={(e) => e.target === e.currentTarget && onCancel()}
+    >
+      <div className="bg-bg-secondary border border-border rounded-lg w-[400px] p-6">
+        <h3 className="text-base font-semibold text-text-primary mb-2">Delete App</h3>
+        <p className="text-sm text-text-secondary mb-6">
+          Are you sure you want to delete <span className="text-text-primary font-medium">{appName}</span>? This will permanently remove the app and all its data.
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 rounded-sm text-sm text-text-secondary hover:text-text-primary transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-sm bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+          >
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );

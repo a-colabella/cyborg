@@ -152,6 +152,81 @@ pub async fn delete_app(app: AppHandle, filename: String) -> Result<(), String> 
 }
 
 #[tauri::command]
+pub async fn update_app_metadata(
+    app: AppHandle,
+    filename: String,
+    display_name: String,
+    description: Option<String>,
+    icon: Option<String>,
+    image_data: Option<String>,
+) -> Result<(), String> {
+    let apps_dir = get_apps_dir(&app)?;
+    let stem = filename.trim_end_matches(".jsx");
+    let meta_path = apps_dir.join(format!("{}.json", stem));
+
+    // Load existing metadata or create a new one
+    let mut metadata = if meta_path.exists() {
+        fs::read_to_string(&meta_path)
+            .ok()
+            .and_then(|s| serde_json::from_str::<AppMetadata>(&s).ok())
+            .unwrap_or_else(|| {
+                let now = Utc::now().to_rfc3339();
+                AppMetadata {
+                    display_name: stem.to_string(),
+                    description: None,
+                    icon: None,
+                    image_path: None,
+                    created_at: now.clone(),
+                    updated_at: now,
+                }
+            })
+    } else {
+        let now = Utc::now().to_rfc3339();
+        AppMetadata {
+            display_name: stem.to_string(),
+            description: None,
+            icon: None,
+            image_path: None,
+            created_at: now.clone(),
+            updated_at: now,
+        }
+    };
+
+    metadata.display_name = display_name;
+    metadata.description = description;
+    metadata.updated_at = Utc::now().to_rfc3339();
+
+    // Handle image update
+    if let Some(data) = image_data {
+        let images_dir = apps_dir.join("images");
+        if !images_dir.exists() {
+            fs::create_dir_all(&images_dir).map_err(|e| e.to_string())?;
+        }
+        let image_filename = format!("{}.png", stem);
+        let image_full_path = images_dir.join(&image_filename);
+        let bytes = STANDARD.decode(&data).map_err(|e| e.to_string())?;
+        fs::write(&image_full_path, &bytes).map_err(|e| e.to_string())?;
+        metadata.image_path = Some(format!("images/{}", image_filename));
+        metadata.icon = None;
+    } else if icon.is_some() {
+        metadata.icon = icon;
+        // If switching from image to icon, clean up old image
+        if let Some(ref img_path) = metadata.image_path {
+            let full_img_path = apps_dir.join(img_path);
+            if full_img_path.exists() {
+                let _ = fs::remove_file(&full_img_path);
+            }
+        }
+        metadata.image_path = None;
+    }
+
+    let meta_json = serde_json::to_string_pretty(&metadata).map_err(|e| e.to_string())?;
+    fs::write(&meta_path, meta_json).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn get_app_image(app: AppHandle, image_path: String) -> Result<String, String> {
     let apps_dir = get_apps_dir(&app)?;
     let full_path = apps_dir.join(&image_path);
