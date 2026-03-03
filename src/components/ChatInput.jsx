@@ -30,7 +30,7 @@ export default function ChatInput({ onSend, disabled }) {
 
   return (
     <div className="border-t border-border p-4">
-      <div className="flex items-center gap-3 bg-bg-secondary rounded-xl px-4 py-3">
+      <div className="flex items-center gap-3 bg-bg-secondary rounded-sm px-4 py-3">
         <textarea
           ref={textareaRef}
           value={text}
@@ -45,7 +45,7 @@ export default function ChatInput({ onSend, disabled }) {
           onClick={handleSubmit}
           disabled={!text.trim() || disabled}
           title="Send"
-          className="p-2 rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-2 rounded-sm bg-accent hover:bg-accent-hover text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <PaperPlaneTilt size={20} weight="fill" />
         </button>

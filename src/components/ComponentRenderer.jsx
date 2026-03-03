@@ -87,7 +87,7 @@ export default function ComponentRenderer({ code }) {
   return (
     <div className="relative w-full h-full">
       {error && (
-        <div className="absolute top-0 left-0 right-0 z-10 bg-red-900/50 border border-red-500 text-red-200 text-xs px-4 py-3 rounded-lg m-2">
+        <div className="absolute top-0 left-0 right-0 z-10 bg-red-900/50 border border-red-500 text-red-200 text-xs px-4 py-3 rounded-sm m-2">
           <div className="font-semibold mb-1">Render Error</div>
           <pre className="whitespace-pre-wrap font-mono">{error}</pre>
         </div>

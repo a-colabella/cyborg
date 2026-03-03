@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import ComponentRenderer from './ComponentRenderer';
+import { CoffeeIcon, FloppyDiskIcon, PaintBrushIcon } from '@phosphor-icons/react';
 
 function SaveDialog({ onSave, onCancel }) {
   const [name, setName] = useState('');
@@ -23,7 +24,7 @@ function SaveDialog({ onSave, onCancel }) {
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-bg-secondary border border-border rounded-xl w-[360px] p-6"
+        className="bg-bg-secondary border border-border rounded-sm w-[360px] p-6"
       >
         <h3 className="text-sm font-semibold text-text-primary mb-4">
           Save App
@@ -34,20 +35,20 @@ function SaveDialog({ onSave, onCancel }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter a name for this app..."
-          className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors mb-4"
+          className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors mb-4"
         />
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary transition-colors"
+            className="px-4 py-2 rounded-sm text-sm text-text-secondary hover:text-text-primary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!name.trim()}
-            className="px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-sm bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-40"
           >
             Save
           </button>
@@ -77,13 +78,17 @@ export default function CanvasPanel({ componentCode }) {
     <div className="flex flex-col h-full bg-bg-secondary">
       {/* Canvas Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <span className="text-sm font-semibold text-text-primary">Canvas</span>
+        <div className="flex items-center gap-2">
+          <PaintBrushIcon size={18} weight="regular" />
+          <span className="text-sm font-semibold text-text-primary">Canvas</span>
+        </div>
         <button
           onClick={() => setShowSaveDialog(true)}
           disabled={!componentCode || saving}
-          className="text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {saving ? 'Saving...' : 'Save as App'}
+          <FloppyDiskIcon size={18} weight="regular" />
+          <span>{saving ? 'Saving...' : 'Save as App'}</span>
         </button>
       </div>
 
@@ -92,8 +97,11 @@ export default function CanvasPanel({ componentCode }) {
         {componentCode ? (
           <ComponentRenderer code={componentCode} />
         ) : (
-          <div className="flex items-center justify-center h-full text-text-secondary text-sm">
-            Ask the AI to build something and it will appear here.
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-text-secondary text-sm">
+            <CoffeeIcon size={48} weight="regular" />
+            <span>
+              Ask your AI agent to build something and it will appear here.
+            </span>
           </div>
         )}
       </div>

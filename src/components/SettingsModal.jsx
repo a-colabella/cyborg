@@ -69,7 +69,7 @@ export default function SettingsModal({ onClose }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       onClick={handleBackdropClick}
     >
-      <div className="bg-bg-secondary border border-border rounded-xl w-[520px] max-h-[80vh] overflow-y-auto">
+      <div className="bg-bg-secondary border border-border rounded-sm w-[520px] max-h-[80vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-base font-semibold text-text-primary">Settings</h2>
@@ -92,7 +92,7 @@ export default function SettingsModal({ onClose }) {
                 <button
                   key={p.id}
                   onClick={() => setActiveProvider(p.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-sm text-xs font-medium transition-colors ${
                     activeProvider === p.id
                       ? 'bg-accent text-white'
                       : 'bg-bg-tertiary text-text-secondary hover:text-text-primary'
@@ -117,7 +117,7 @@ export default function SettingsModal({ onClose }) {
                   setApiKeys((prev) => ({ ...prev, [p.id]: e.target.value }))
                 }
                 placeholder={p.placeholder}
-                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
+                className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
               />
               <div className="mt-2">
                 <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -151,14 +151,14 @@ export default function SettingsModal({ onClose }) {
                 value={supabaseUrl}
                 onChange={(e) => setSupabaseUrl(e.target.value)}
                 placeholder="https://your-project.supabase.co"
-                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
+                className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
               />
               <input
                 type="password"
                 value={supabaseKey}
                 onChange={(e) => setSupabaseKey(e.target.value)}
                 placeholder="Supabase anon key"
-                className="w-full bg-bg-primary border border-border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
+                className="w-full bg-bg-primary border border-border rounded-sm px-3 py-2 text-sm text-text-primary outline-none focus:border-accent transition-colors"
               />
             </div>
           </div>
@@ -168,14 +168,14 @@ export default function SettingsModal({ onClose }) {
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary transition-colors"
+            className="px-4 py-2 rounded-sm text-sm text-text-secondary hover:text-text-primary transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-sm bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>

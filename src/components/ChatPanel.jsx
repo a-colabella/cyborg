@@ -4,7 +4,7 @@ import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import SavedAppsMenu from './SavedAppsMenu';
-import { Gear, GearIcon } from '@phosphor-icons/react';
+import { AppWindowIcon, ChatTextIcon, GearIcon } from '@phosphor-icons/react';
 import { SYSTEM_PROMPT } from '../systemPrompt';
 import logo from '../assets/app-icon.svg';
 
@@ -82,9 +82,10 @@ export default function ChatPanel({
         <div className="flex gap-2">
           <button
             onClick={() => setSavedAppsOpen(!savedAppsOpen)}
-            className="text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
+            className="flex items-center gap-2 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
           >
-            Saved Apps
+            <AppWindowIcon size={18} weight="regular" />
+            <span>My Apps</span>
           </button>
           <button
             onClick={onOpenSettings}
@@ -110,8 +111,11 @@ export default function ChatPanel({
       {/* Message List */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full text-text-secondary text-sm">
-            Start a conversation to begin building.
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-text-secondary text-sm">
+            <ChatTextIcon size={48} weight="regular" />
+            <span>
+              Start a conversation to begin building.
+            </span>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -119,7 +123,7 @@ export default function ChatPanel({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-ai-bubble border border-border rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-text-secondary">
+            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-md px-4 py-2.5 text-sm text-text-secondary">
               Thinking...
             </div>
           </div>

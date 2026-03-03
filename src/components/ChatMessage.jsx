@@ -30,7 +30,7 @@ function CodeCollapsible({ children, className }) {
         Show Code
       </button>
       {open && (
-        <pre className="bg-bg-tertiary rounded-lg p-3 mt-1 overflow-x-auto">
+        <pre className="bg-bg-tertiary rounded-sm p-3 mt-1 overflow-x-auto">
           <code className="text-xs text-text-primary whitespace-pre-wrap break-words">
             {children}
           </code>
@@ -46,10 +46,10 @@ export default function ChatMessage({ role, content }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed overflow-hidden ${
+        className={`max-w-[85%] px-4 py-2.5 rounded-sm text-sm leading-relaxed overflow-hidden ${
           isUser
-            ? 'bg-user-bubble text-white rounded-br-md'
-            : 'bg-ai-bubble text-text-primary rounded-bl-md border border-border'
+            ? 'bg-user-bubble text-white rounded-br-sm'
+            : 'bg-ai-bubble text-text-primary rounded-bl-sm border border-border'
         }`}
       >
         {isUser ? (
