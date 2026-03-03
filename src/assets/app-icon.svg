@@ -1,0 +1,37 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" fill="none">
+
+  <!-- Left Half: Semi-circle Outline -->
+  <path d="M128 40
+           A88 88 0 0 0 128 216"
+        stroke="currentColor"
+        stroke-width="18"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Right Half: Square Outline -->
+  <path d="M128 40
+           H216
+           V216
+           H128"
+        stroke="currentColor"
+        stroke-width="18"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Center Divider -->
+  <line x1="128" y1="40" x2="128" y2="216"
+        stroke="currentColor"
+        stroke-width="12"
+        stroke-linecap="round"/>
+
+  <!-- Square Eye (Human Side) -->
+  <rect x="88" y="112" width="20" height="20"
+        stroke="currentColor"
+        stroke-width="12"/>
+
+  <!-- Circle Eye (Robot Side) -->
+  <circle cx="168" cy="122" r="10"
+          stroke="currentColor"
+          stroke-width="12"/>
+
+</svg>
