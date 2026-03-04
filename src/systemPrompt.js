@@ -19,7 +19,7 @@ EXAMPLE FORMAT:
 const App = () => {
   const [count, setCount] = useState(0);
   return (
-    <div style={{ padding: '24px', background: '#1a1a1a', color: '#e0e0e0', minHeight: '100%', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ padding: '24px', background: '#1a1a1a', color: '#e0e0e0', minHeight: '100%', fontFamily: 'Space Grotesk, system-ui, sans-serif' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Counter</h1>
       <button
         onClick={() => setCount(c => c + 1)}
@@ -145,7 +145,7 @@ const App = () => {
   };
 
   return (
-    <div style={{ padding: '24px', background: '#1a1a1a', color: '#e0e0e0', minHeight: '100%', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ padding: '24px', background: '#1a1a1a', color: '#e0e0e0', minHeight: '100%', fontFamily: 'Space Grotesk, system-ui, sans-serif' }}>
       <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Todo List</h1>
       {error && <div style={{ color: '#f87171', marginBottom: '8px', fontSize: '12px' }}>{error}</div>}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
