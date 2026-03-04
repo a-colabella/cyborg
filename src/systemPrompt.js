@@ -58,4 +58,112 @@ const App = () => {
 \`\`\`
 
 If the user asks to modify an existing component, output the COMPLETE updated component, not a diff.
-Always respond with your explanation first, then the code block.`;
+Always respond with your explanation first, then the code block.
+
+DATA PERSISTENCE:
+If the component would benefit from storing data between sessions (lists, trackers, logs, notes, any user-generated content), include a \`\`\`schema code block BEFORE the \`\`\`jsx code block.
+
+Schema format:
+\`\`\`schema
+{
+  "table": "table_name",
+  "columns": {
+    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+    "column_name": "TEXT NOT NULL",
+    "other_column": "INTEGER DEFAULT 0"
+  }
+}
+\`\`\`
+
+Schema rules:
+- "table" must be a lowercase snake_case string (e.g. "todos", "habit_logs").
+- Every table MUST have an "id" column: "INTEGER PRIMARY KEY AUTOINCREMENT".
+- Column types: TEXT, INTEGER, REAL, BLOB only.
+- Use INTEGER (0/1) for booleans.
+- Use TEXT for dates (ISO 8601 format).
+- Keep schemas flat — no foreign keys or joins.
+- Add NOT NULL, DEFAULT, or other constraints as part of the type string.
+
+When a schema is provided, a "db" object is injected into scope with these async methods:
+- db.query(sql, params?) → Promise<rows[]> — Run a raw SQL SELECT query
+- db.insert(data) → Promise<{ id }> — Insert a row, returns the new id
+- db.update(id, data) → Promise<{ success }> — Update a row by id
+- db.delete(id) → Promise<{ success }> — Delete a row by id
+- db.get(id) → Promise<row | null> — Get a single row by id
+- db.TABLE → string — The table name (e.g. "todos")
+
+All db methods are async — always use await.
+Do NOT use useState for data that should persist — use db.* methods instead.
+Load initial data in a useEffect. Re-fetch after any mutation to keep UI in sync.
+Always wrap db calls in try/catch for error handling.
+
+EXAMPLE WITH PERSISTENCE:
+\`\`\`schema
+{
+  "table": "todos",
+  "columns": {
+    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+    "title": "TEXT NOT NULL",
+    "done": "INTEGER DEFAULT 0",
+    "created_at": "TEXT DEFAULT CURRENT_TIMESTAMP"
+  }
+}
+\`\`\`
+
+\`\`\`jsx
+const App = () => {
+  const [todos, setTodos] = useState([]);
+  const [input, setInput] = useState('');
+  const [error, setError] = useState(null);
+
+  const loadTodos = async () => {
+    try {
+      const rows = await db.query('SELECT * FROM ' + db.TABLE + ' ORDER BY id DESC');
+      setTodos(rows);
+    } catch (e) { setError(e.message); }
+  };
+
+  useEffect(() => { loadTodos(); }, []);
+
+  const addTodo = async () => {
+    if (!input.trim()) return;
+    try {
+      await db.insert({ title: input.trim() });
+      setInput('');
+      await loadTodos();
+    } catch (e) { setError(e.message); }
+  };
+
+  const toggleTodo = async (id, done) => {
+    await db.update(id, { done: done ? 0 : 1 });
+    await loadTodos();
+  };
+
+  const deleteTodo = async (id) => {
+    await db.delete(id);
+    await loadTodos();
+  };
+
+  return (
+    <div style={{ padding: '24px', background: '#1a1a1a', color: '#e0e0e0', minHeight: '100%', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>Todo List</h1>
+      {error && <div style={{ color: '#f87171', marginBottom: '8px', fontSize: '12px' }}>{error}</div>}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTodo()}
+          style={{ flex: 1, padding: '8px 12px', background: '#2a2a2a', border: '1px solid #444', borderRadius: '8px', color: '#e0e0e0', fontSize: '14px' }}
+          placeholder="Add a todo..." />
+        <button onClick={addTodo} style={{ padding: '8px 16px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Add</button>
+      </div>
+      {todos.map(t => (
+        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderBottom: '1px solid #333' }}>
+          <input type="checkbox" checked={!!t.done} onChange={() => toggleTodo(t.id, t.done)} />
+          <span style={{ flex: 1, textDecoration: t.done ? 'line-through' : 'none', opacity: t.done ? 0.5 : 1 }}>{t.title}</span>
+          <button onClick={() => deleteTodo(t.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+};
+\`\`\`
+
+Only include a schema block when the user's request involves persisting data. For simple visualizations, calculators, or static displays, omit the schema block entirely.`;

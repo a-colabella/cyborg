@@ -10,6 +10,7 @@ export default function ChatPanel({
   messages,
   setMessages,
   onComponentUpdate,
+  onSchemaUpdate,
   isLoading,
   setIsLoading,
 }) {
@@ -57,6 +58,19 @@ export default function ChatPanel({
       if (response.component_code) {
         onComponentUpdate(response.component_code);
       }
+
+      if (response.schema) {
+        try {
+          const parsed = JSON.parse(response.schema);
+          onSchemaUpdate(parsed);
+        } catch (e) {
+          console.error('Failed to parse schema:', e);
+          onSchemaUpdate(null);
+        }
+      } else if (response.component_code) {
+        // New component without schema — clear any previous schema
+        onSchemaUpdate(null);
+      }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -90,7 +104,7 @@ export default function ChatPanel({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-md px-4 py-2.5 text-sm text-text-secondary">
+            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-sm px-4 py-2.5 text-sm text-text-secondary">
               Thinking...
             </div>
           </div>

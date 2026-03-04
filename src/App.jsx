@@ -1,18 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import CanvasPage from './components/pages/CanvasPage';
 import MyAppsPage from './components/pages/MyAppsPage';
 import SettingsPage from './components/pages/SettingsPage';
+import { initDatabase } from './db';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('canvas');
   const [messages, setMessages] = useState([]);
   const [currentComponent, setCurrentComponent] = useState(null);
+  const [currentSchema, setCurrentSchema] = useState(null);
   const [currentAppInfo, setCurrentAppInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [dbReady, setDbReady] = useState(false);
 
-  const handleLoadApp = (code, appInfo) => {
+  useEffect(() => {
+    initDatabase()
+      .then(() => setDbReady(true))
+      .catch((err) => console.error('Failed to initialize database:', err));
+  }, []);
+
+  const handleLoadApp = (code, appInfo, schema) => {
     setCurrentComponent(code);
+    setCurrentSchema(schema || null);
     setCurrentAppInfo(appInfo);
     setCurrentPage('canvas');
   };
@@ -28,6 +38,8 @@ function App() {
             setMessages={setMessages}
             currentComponent={currentComponent}
             setCurrentComponent={setCurrentComponent}
+            currentSchema={currentSchema}
+            setCurrentSchema={setCurrentSchema}
             currentAppInfo={currentAppInfo}
             setCurrentAppInfo={setCurrentAppInfo}
             isLoading={isLoading}

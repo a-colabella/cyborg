@@ -43,8 +43,9 @@ export default function MyAppsPage({ onLoadApp }) {
 
   const handleLoad = async (app) => {
     try {
-      const code = await invoke('load_app', { filename: app.filename });
-      onLoadApp(code, app);
+      const result = await invoke('load_app', { filename: app.filename });
+      const schema = result.schema ? JSON.parse(result.schema) : null;
+      onLoadApp(result.code, app, schema);
     } catch (err) {
       console.error('Failed to load app:', err);
     }
@@ -178,7 +179,7 @@ function AppCard({ app, imageUrl, onLoad, onEdit, onDelete }) {
   const iconName = app.metadata?.icon;
 
   return (
-    <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden hover:border-accent/50 transition-colors group">
+    <div className="bg-bg-secondary border border-border rounded-sm overflow-hidden hover:border-accent/50 transition-colors group">
       {/* Image / Icon area — clicking opens the app */}
       <div
         className="h-40 bg-bg-tertiary flex items-center justify-center cursor-pointer"
@@ -232,7 +233,7 @@ function DeleteConfirmDialog({ appName, onConfirm, onCancel }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       onClick={(e) => e.target === e.currentTarget && onCancel()}
     >
-      <div className="bg-bg-secondary border border-border rounded-lg w-[400px] p-6">
+      <div className="bg-bg-secondary border border-border rounded-sm w-[400px] p-6">
         <h3 className="text-base font-semibold text-text-primary mb-2">Delete App</h3>
         <p className="text-sm text-text-secondary mb-6">
           Are you sure you want to delete <span className="text-text-primary font-medium">{appName}</span>? This will permanently remove the app and all its data.

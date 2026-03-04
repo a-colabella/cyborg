@@ -43,7 +43,7 @@ export default function Sidebar({ currentPage, onNavigate }) {
             <button
               key={id}
               onClick={() => onNavigate(id)}
-              className={`flex items-center gap-3 w-full rounded-lg transition-colors ${
+              className={`flex items-center gap-3 w-full rounded-sm transition-colors ${
                 expanded ? 'px-3 py-2.5' : 'px-0 py-2.5 justify-center'
               } ${
                 isActive

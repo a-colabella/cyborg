@@ -19,6 +19,7 @@ pub struct ChatRequest {
 pub struct ChatResponse {
     pub content: String,
     pub component_code: Option<String>,
+    pub schema: Option<String>,
 }
 
 #[tauri::command]
@@ -72,10 +73,12 @@ async fn call_claude(client: &Client, request: &ChatRequest) -> Result<ChatRespo
         .to_string();
 
     let component_code = extract_jsx_code(&content);
+    let schema = extract_schema(&content);
 
     Ok(ChatResponse {
         content,
         component_code,
+        schema,
     })
 }
 
@@ -122,10 +125,12 @@ async fn call_openai(client: &Client, request: &ChatRequest) -> Result<ChatRespo
         .to_string();
 
     let component_code = extract_jsx_code(&content);
+    let schema = extract_schema(&content);
 
     Ok(ChatResponse {
         content,
         component_code,
+        schema,
     })
 }
 
@@ -171,10 +176,12 @@ async fn call_gemini(client: &Client, request: &ChatRequest) -> Result<ChatRespo
         .to_string();
 
     let component_code = extract_jsx_code(&content);
+    let schema = extract_schema(&content);
 
     Ok(ChatResponse {
         content,
         component_code,
+        schema,
     })
 }
 
@@ -189,6 +196,21 @@ fn extract_jsx_code(text: &str) -> Option<String> {
                 if !code.is_empty() {
                     return Some(code);
                 }
+            }
+        }
+    }
+    None
+}
+
+/// Extracts schema JSON from ```schema code fences in AI responses.
+fn extract_schema(text: &str) -> Option<String> {
+    let pattern = "```schema";
+    if let Some(start) = text.find(pattern) {
+        let code_start = start + pattern.len();
+        if let Some(end) = text[code_start..].find("```") {
+            let schema = text[code_start..code_start + end].trim().to_string();
+            if !schema.is_empty() {
+                return Some(schema);
             }
         }
     }
