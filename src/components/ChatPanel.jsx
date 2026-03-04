@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { ChatTextIcon } from '@phosphor-icons/react';
+import { ChatTextIcon, CheckCircleIcon, XCircleIcon } from '@phosphor-icons/react';
 import { SYSTEM_PROMPT } from '../systemPrompt';
 
 export default function ChatPanel({
@@ -13,7 +13,18 @@ export default function ChatPanel({
   onSchemaUpdate,
   isLoading,
   setIsLoading,
+  appInfo,
+  currentCode,
+  currentSchema,
+  hasPendingUpdate,
+  onAccept,
+  onDiscard,
+  onClear,
 }) {
+  const [accepting, setAccepting] = useState(false);
+  const isEditingMode = appInfo != null;
+  const displayName = appInfo?.metadata?.display_name || appInfo?.name || 'App';
+
   const handleSend = async (text) => {
     const userMessage = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
@@ -38,14 +49,29 @@ export default function ChatPanel({
         return;
       }
 
+      // Build the messages array for the AI
+      let aiMessages = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      // In editing mode, prepend a context block with the current app code/schema
+      if (isEditingMode && currentCode) {
+        const schemaBlock = currentSchema
+          ? `\n\nCurrent schema:\n\`\`\`schema\n${JSON.stringify(currentSchema, null, 2)}\n\`\`\``
+          : '';
+        const contextMessage = {
+          role: 'user',
+          content: `[SYSTEM CONTEXT — CURRENT APP]\nThe user is editing "${displayName}". Current code and schema follow.\n\n\`\`\`jsx\n${currentCode}\n\`\`\`${schemaBlock}\n\nInstructions: Respond with the updated component. Always include a schema block if the current app has one. Do NOT use window.confirm(), window.alert(), or window.prompt(). Output the FULL component, not a diff.`,
+        };
+        aiMessages = [contextMessage, ...aiMessages];
+      }
+
       const response = await invoke('chat', {
         request: {
           provider,
           api_key: apiKey,
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: aiMessages,
           system_prompt: SYSTEM_PROMPT,
         },
       });
@@ -111,8 +137,50 @@ export default function ChatPanel({
         )}
       </div>
 
+      {/* Context Indicator Bar — visible when editing a saved app */}
+      {isEditingMode && (
+        <div className="flex items-center justify-start px-4 py-2 bg-accent border-t border-accent/30">
+          <span className="text-xs text-primary font-medium">
+            Editing: {displayName}
+          </span>
+        </div>
+      )}
+
+      {/* Accept/Discard Bar — visible when there's a pending update */}
+      {hasPendingUpdate && (
+        <div className="flex items-center justify-between px-4 py-2 bg-emerald-900/20 border-t border-emerald-700/30">
+          <span className="text-xs text-emerald-300 font-medium">
+            New version ready.
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onDiscard}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
+            >
+              <XCircleIcon size={14} weight="regular" />
+              <span>Discard</span>
+            </button>
+            <button
+              onClick={async () => {
+                setAccepting(true);
+                try { await onAccept(); } finally { setAccepting(false); }
+              }}
+              disabled={accepting}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <CheckCircleIcon size={14} weight="fill" />
+              <span>{accepting ? 'Saving...' : 'Accept & Save'}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input Area */}
-      <ChatInput onSend={handleSend} disabled={isLoading} />
+      <ChatInput
+        onSend={handleSend}
+        disabled={isLoading}
+        placeholder={isEditingMode ? `Describe a change or bug fix for ${displayName}...` : undefined}
+      />
     </div>
   );
 }

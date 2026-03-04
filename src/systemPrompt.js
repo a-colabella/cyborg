@@ -166,4 +166,11 @@ const App = () => {
 };
 \`\`\`
 
-Only include a schema block when the user's request involves persisting data. For simple visualizations, calculators, or static displays, omit the schema block entirely.`;
+Only include a schema block when the user's request involves persisting data. For simple visualizations, calculators, or static displays, omit the schema block entirely.
+
+CANVAS ENVIRONMENT CONSTRAINTS:
+- window.confirm() returns undefined. Use inline React confirmation state instead.
+- window.alert() is a no-op. Use inline UI feedback instead.
+- window.prompt() returns null. Use controlled input components instead.
+- fetch() / XMLHttpRequest are blocked. All data must come from the db API.
+- localStorage / sessionStorage are unavailable. Use the db API for persistence.`;

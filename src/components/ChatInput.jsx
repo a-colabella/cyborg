@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { PaperPlaneTilt } from '@phosphor-icons/react';
 
-export default function ChatInput({ onSend, disabled }) {
+export default function ChatInput({ onSend, disabled, placeholder = "Describe what you want to build..." }) {
   const [text, setText] = useState('');
   const textareaRef = useRef(null);
 
@@ -36,7 +36,7 @@ export default function ChatInput({ onSend, disabled }) {
           value={text}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="Describe what you want to build..."
+          placeholder={placeholder}
           rows={1}
           className="flex-1 bg-transparent text-text-primary text-sm resize-none outline-none placeholder:text-text-secondary"
           disabled={disabled}

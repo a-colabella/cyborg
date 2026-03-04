@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import ChatPanel from '../ChatPanel';
 import CanvasPanel from '../CanvasPanel';
 
@@ -16,7 +17,42 @@ export default function CanvasPage({
 }) {
   const [splitPosition, setSplitPosition] = useState(60);
   const [isDragging, setIsDragging] = useState(false);
+  const [savedVersion, setSavedVersion] = useState(null);
   const containerRef = useRef(null);
+
+  const isEditingMode = currentAppInfo != null;
+  const hasPendingUpdate = isEditingMode && savedVersion != null
+    && (currentComponent !== savedVersion.code
+        || JSON.stringify(currentSchema) !== JSON.stringify(savedVersion.schema));
+
+  // Snapshot savedVersion when a saved app loads
+  useEffect(() => {
+    if (currentAppInfo != null) {
+      setSavedVersion({ code: currentComponent, schema: currentSchema });
+    } else {
+      setSavedVersion(null);
+    }
+  }, [currentAppInfo]);
+
+  const handleAccept = async () => {
+    try {
+      await invoke('update_app_code', {
+        filename: currentAppInfo.filename,
+        code: currentComponent,
+        schema: currentSchema ? JSON.stringify(currentSchema) : null,
+      });
+      setSavedVersion({ code: currentComponent, schema: currentSchema });
+    } catch (err) {
+      console.error('Failed to save app update:', err);
+    }
+  };
+
+  const handleDiscard = () => {
+    if (savedVersion) {
+      setCurrentComponent(savedVersion.code);
+      setCurrentSchema(savedVersion.schema);
+    }
+  };
 
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
@@ -66,6 +102,7 @@ export default function CanvasPage({
             setCurrentComponent(null);
             setCurrentSchema(null);
             setCurrentAppInfo(null);
+            setSavedVersion(null);
           }}
         />
       </div>
@@ -85,6 +122,18 @@ export default function CanvasPage({
           onSchemaUpdate={setCurrentSchema}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
+          appInfo={currentAppInfo}
+          currentCode={currentComponent}
+          currentSchema={currentSchema}
+          hasPendingUpdate={hasPendingUpdate}
+          onAccept={handleAccept}
+          onDiscard={handleDiscard}
+          onClear={() => {
+            setCurrentComponent(null);
+            setCurrentSchema(null);
+            setCurrentAppInfo(null);
+            setSavedVersion(null);
+          }}
         />
       </div>
     </div>
