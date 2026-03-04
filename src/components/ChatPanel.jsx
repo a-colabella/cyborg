@@ -139,16 +139,10 @@ export default function ChatPanel({
 
       {/* Context Indicator Bar — visible when editing a saved app */}
       {isEditingMode && (
-        <div className="flex items-center justify-between px-4 py-2 bg-amber-900/20 border-t border-amber-700/30">
-          <span className="text-xs text-amber-300 font-medium">
+        <div className="flex items-center justify-start px-4 py-2 bg-accent border-t border-accent/30">
+          <span className="text-xs text-primary font-medium">
             Editing: {displayName}
           </span>
-          <button
-            onClick={onClear}
-            className="text-xs px-2 py-1 rounded text-amber-300 hover:text-amber-100 hover:bg-amber-800/30 transition-colors"
-          >
-            Stop Editing
-          </button>
         </div>
       )}
 
