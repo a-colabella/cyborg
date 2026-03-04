@@ -11,13 +11,14 @@
   --color-accent-hover: #87bcfc;
   --color-user-bubble: #4e92e3;
   --color-ai-bubble: #1e1e1e;
+  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   margin: 0;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
