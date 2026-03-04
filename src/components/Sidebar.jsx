@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { PaintBrushIcon, AppWindowIcon, GearIcon } from '@phosphor-icons/react';
+import {
+  PaintBrushIcon,
+  AppWindowIcon,
+  GearIcon,
+  SidebarIcon,
+  SidebarSimpleIcon,
+} from '@phosphor-icons/react';
 import logo from '../assets/app-icon.svg';
 
 const NAV_ITEMS = [
@@ -9,14 +15,13 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar({ currentPage, onNavigate }) {
-  const [expanded, setExpanded] = useState(false);
+  const [isPinnedOpen, setIsPinnedOpen] = useState(false);
+  const isExpanded = isPinnedOpen;
 
   return (
     <aside
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
       className={`h-full bg-bg-secondary border-r border-border flex flex-col items-start flex-shrink-0 transition-all duration-200 overflow-hidden ${
-        expanded ? 'w-[200px]' : 'w-16'
+        isExpanded ? 'w-[200px]' : 'w-16'
       }`}
     >
       {/* Logo */}
@@ -28,7 +33,7 @@ export default function Sidebar({ currentPage, onNavigate }) {
           height={28}
           className="brightness-0 invert flex-shrink-0"
         />
-        {expanded && (
+        {isExpanded && (
           <span className="text-sm font-semibold text-text-primary whitespace-nowrap">
             Cyborg
           </span>
@@ -44,7 +49,7 @@ export default function Sidebar({ currentPage, onNavigate }) {
               key={id}
               onClick={() => onNavigate(id)}
               className={`flex items-center gap-3 w-full rounded-sm transition-colors ${
-                expanded ? 'px-3 py-2.5' : 'px-0 py-2.5 justify-center'
+                isExpanded ? 'px-3 py-2.5' : 'px-0 py-2.5 justify-center'
               } ${
                 isActive
                   ? 'bg-bg-tertiary text-accent'
@@ -56,13 +61,31 @@ export default function Sidebar({ currentPage, onNavigate }) {
                 weight={isActive ? 'fill' : 'regular'}
                 className="flex-shrink-0"
               />
-              {expanded && (
+              {isExpanded && (
                 <span className="text-sm whitespace-nowrap">{label}</span>
               )}
             </button>
           );
         })}
       </nav>
+
+      {/* Toggle: expand / collapse */}
+      <div className="mt-auto w-full px-2 py-2">
+        <button
+          type="button"
+          onClick={() => setIsPinnedOpen((prev) => !prev)}
+          className={`flex items-center gap-3 w-full rounded-sm transition-colors text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/50 ${
+            isExpanded ? 'px-3 py-2.5 justify-end' : 'px-0 py-2.5 justify-center'
+          }`}
+          title={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          {isExpanded ? (
+            <SidebarSimpleIcon size={22} className="flex-shrink-0" />
+          ) : (
+            <SidebarIcon size={22} className="flex-shrink-0" />
+          )}
+        </button>
+      </div>
     </aside>
   );
 }
