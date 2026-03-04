@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { ChatTextIcon } from '@phosphor-icons/react';
+import { ChatTextIcon, CheckCircleIcon, XCircleIcon } from '@phosphor-icons/react';
 import { SYSTEM_PROMPT } from '../systemPrompt';
 
 export default function ChatPanel({
@@ -16,7 +16,12 @@ export default function ChatPanel({
   appInfo,
   currentCode,
   currentSchema,
+  hasPendingUpdate,
+  onAccept,
+  onDiscard,
+  onClear,
 }) {
+  const [accepting, setAccepting] = useState(false);
   const isEditingMode = appInfo != null;
   const displayName = appInfo?.metadata?.display_name || appInfo?.name || 'App';
 
@@ -131,6 +136,50 @@ export default function ChatPanel({
           </div>
         )}
       </div>
+
+      {/* Context Indicator Bar — visible when editing a saved app */}
+      {isEditingMode && (
+        <div className="flex items-center justify-between px-4 py-2 bg-amber-900/20 border-t border-amber-700/30">
+          <span className="text-xs text-amber-300 font-medium">
+            Editing: {displayName}
+          </span>
+          <button
+            onClick={onClear}
+            className="text-xs px-2 py-1 rounded text-amber-300 hover:text-amber-100 hover:bg-amber-800/30 transition-colors"
+          >
+            Stop Editing
+          </button>
+        </div>
+      )}
+
+      {/* Accept/Discard Bar — visible when there's a pending update */}
+      {hasPendingUpdate && (
+        <div className="flex items-center justify-between px-4 py-2 bg-emerald-900/20 border-t border-emerald-700/30">
+          <span className="text-xs text-emerald-300 font-medium">
+            New version ready.
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onDiscard}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors"
+            >
+              <XCircleIcon size={14} weight="regular" />
+              <span>Discard</span>
+            </button>
+            <button
+              onClick={async () => {
+                setAccepting(true);
+                try { await onAccept(); } finally { setAccepting(false); }
+              }}
+              disabled={accepting}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <CheckCircleIcon size={14} weight="fill" />
+              <span>{accepting ? 'Saving...' : 'Accept & Save'}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Input Area */}
       <ChatInput

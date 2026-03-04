@@ -104,10 +104,6 @@ export default function CanvasPage({
             setCurrentAppInfo(null);
             setSavedVersion(null);
           }}
-          isEditingMode={isEditingMode}
-          hasPendingUpdate={hasPendingUpdate}
-          onAccept={handleAccept}
-          onDiscard={handleDiscard}
         />
       </div>
 
@@ -129,6 +125,15 @@ export default function CanvasPage({
           appInfo={currentAppInfo}
           currentCode={currentComponent}
           currentSchema={currentSchema}
+          hasPendingUpdate={hasPendingUpdate}
+          onAccept={handleAccept}
+          onDiscard={handleDiscard}
+          onClear={() => {
+            setCurrentComponent(null);
+            setCurrentSchema(null);
+            setCurrentAppInfo(null);
+            setSavedVersion(null);
+          }}
         />
       </div>
     </div>
