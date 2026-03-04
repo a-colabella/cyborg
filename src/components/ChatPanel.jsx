@@ -104,7 +104,7 @@ export default function ChatPanel({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-md px-4 py-2.5 text-sm text-text-secondary">
+            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-sm px-4 py-2.5 text-sm text-text-secondary">
               Thinking...
             </div>
           </div>

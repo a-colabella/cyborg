@@ -76,7 +76,7 @@ export default function SaveDialog({ onSave, onCancel, editMode = false, initial
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-bg-secondary border border-border rounded-lg w-[480px] max-h-[85vh] overflow-y-auto"
+        className="bg-bg-secondary border border-border rounded-sm w-[480px] max-h-[85vh] overflow-y-auto"
       >
         <div className="px-6 pt-6 pb-4">
           <h3 className="text-base font-semibold text-text-primary mb-4">
@@ -141,7 +141,7 @@ export default function SaveDialog({ onSave, onCancel, editMode = false, initial
                   key={iconName}
                   type="button"
                   onClick={() => setSelectedIcon(iconName)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                  className={`w-10 h-10 rounded-sm flex items-center justify-center transition-colors ${
                     selectedIcon === iconName
                       ? 'bg-accent/20 text-accent ring-1 ring-accent'
                       : 'bg-bg-tertiary text-text-secondary hover:text-text-primary'
@@ -162,7 +162,7 @@ export default function SaveDialog({ onSave, onCancel, editMode = false, initial
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-40 object-cover rounded-lg border border-border"
+                    className="w-full h-40 object-cover rounded-sm border border-border"
                   />
                   <button
                     type="button"
@@ -176,7 +176,7 @@ export default function SaveDialog({ onSave, onCancel, editMode = false, initial
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-40 rounded-lg border-2 border-dashed border-border hover:border-accent/50 flex flex-col items-center justify-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
+                  className="w-full h-40 rounded-sm border-2 border-dashed border-border hover:border-accent/50 flex flex-col items-center justify-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
                 >
                   <UploadSimpleIcon size={32} weight="regular" />
                   <span className="text-xs">Click to upload an image</span>

@@ -204,7 +204,7 @@ export default function CanvasPanel({ componentCode, schema, appInfo, onAppInfoU
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
           onClick={(e) => e.target === e.currentTarget && setShowClearConfirm(false)}
         >
-          <div className="bg-bg-secondary border border-border rounded-lg w-[400px] p-6">
+          <div className="bg-bg-secondary border border-border rounded-sm w-[400px] p-6">
             <h3 className="text-base font-semibold text-text-primary mb-2">Clear Canvas</h3>
             <p className="text-sm text-text-secondary mb-6">
               This will discard what is currently on the canvas. Are you sure?

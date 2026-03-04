@@ -233,7 +233,7 @@ function DeleteConfirmDialog({ appName, onConfirm, onCancel }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       onClick={(e) => e.target === e.currentTarget && onCancel()}
     >
-      <div className="bg-bg-secondary border border-border rounded-lg w-[400px] p-6">
+      <div className="bg-bg-secondary border border-border rounded-sm w-[400px] p-6">
         <h3 className="text-base font-semibold text-text-primary mb-2">Delete App</h3>
         <p className="text-sm text-text-secondary mb-6">
           Are you sure you want to delete <span className="text-text-primary font-medium">{appName}</span>? This will permanently remove the app and all its data.
