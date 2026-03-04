@@ -14,6 +14,7 @@ pub fn run() {
             commands::apps::delete_app,
             commands::apps::get_app_image,
             commands::apps::update_app_metadata,
+            commands::apps::update_app_code,
             commands::settings::get_settings,
             commands::settings::set_settings,
             commands::database::init_db,

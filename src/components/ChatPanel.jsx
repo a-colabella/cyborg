@@ -13,7 +13,13 @@ export default function ChatPanel({
   onSchemaUpdate,
   isLoading,
   setIsLoading,
+  appInfo,
+  currentCode,
+  currentSchema,
 }) {
+  const isEditingMode = appInfo != null;
+  const displayName = appInfo?.metadata?.display_name || appInfo?.name || 'App';
+
   const handleSend = async (text) => {
     const userMessage = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
@@ -38,14 +44,29 @@ export default function ChatPanel({
         return;
       }
 
+      // Build the messages array for the AI
+      let aiMessages = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      // In editing mode, prepend a context block with the current app code/schema
+      if (isEditingMode && currentCode) {
+        const schemaBlock = currentSchema
+          ? `\n\nCurrent schema:\n\`\`\`schema\n${JSON.stringify(currentSchema, null, 2)}\n\`\`\``
+          : '';
+        const contextMessage = {
+          role: 'user',
+          content: `[SYSTEM CONTEXT — CURRENT APP]\nThe user is editing "${displayName}". Current code and schema follow.\n\n\`\`\`jsx\n${currentCode}\n\`\`\`${schemaBlock}\n\nInstructions: Respond with the updated component. Always include a schema block if the current app has one. Do NOT use window.confirm(), window.alert(), or window.prompt(). Output the FULL component, not a diff.`,
+        };
+        aiMessages = [contextMessage, ...aiMessages];
+      }
+
       const response = await invoke('chat', {
         request: {
           provider,
           api_key: apiKey,
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: aiMessages,
           system_prompt: SYSTEM_PROMPT,
         },
       });
@@ -112,7 +133,11 @@ export default function ChatPanel({
       </div>
 
       {/* Input Area */}
-      <ChatInput onSend={handleSend} disabled={isLoading} />
+      <ChatInput
+        onSend={handleSend}
+        disabled={isLoading}
+        placeholder={isEditingMode ? `Describe a change or bug fix for ${displayName}...` : undefined}
+      />
     </div>
   );
 }

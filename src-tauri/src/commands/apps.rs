@@ -260,6 +260,35 @@ pub async fn get_app_image(app: AppHandle, image_path: String) -> Result<String,
     Ok(STANDARD.encode(&bytes))
 }
 
+#[tauri::command]
+pub async fn update_app_code(
+    app: AppHandle,
+    filename: String,
+    code: String,
+    schema: Option<String>,
+) -> Result<(), String> {
+    let apps_dir = get_apps_dir(&app)?;
+    let path = apps_dir.join(&filename);
+
+    // Write the updated JSX code
+    fs::write(&path, &code).map_err(|e| e.to_string())?;
+
+    // Update metadata sidecar — only touch schema and updated_at
+    let stem = filename.trim_end_matches(".jsx");
+    let meta_path = apps_dir.join(format!("{}.json", stem));
+    if meta_path.exists() {
+        let meta_str = fs::read_to_string(&meta_path).map_err(|e| e.to_string())?;
+        let mut metadata: AppMetadata =
+            serde_json::from_str(&meta_str).map_err(|e| e.to_string())?;
+        metadata.schema = schema;
+        metadata.updated_at = Utc::now().to_rfc3339();
+        let meta_json = serde_json::to_string_pretty(&metadata).map_err(|e| e.to_string())?;
+        fs::write(&meta_path, meta_json).map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
 fn sanitize_filename(name: &str) -> String {
     name.chars()
         .map(|c| {
