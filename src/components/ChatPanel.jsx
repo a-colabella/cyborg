@@ -10,6 +10,7 @@ export default function ChatPanel({
   messages,
   setMessages,
   onComponentUpdate,
+  onSchemaUpdate,
   isLoading,
   setIsLoading,
 }) {
@@ -56,6 +57,19 @@ export default function ChatPanel({
 
       if (response.component_code) {
         onComponentUpdate(response.component_code);
+      }
+
+      if (response.schema) {
+        try {
+          const parsed = JSON.parse(response.schema);
+          onSchemaUpdate(parsed);
+        } catch (e) {
+          console.error('Failed to parse schema:', e);
+          onSchemaUpdate(null);
+        }
+      } else if (response.component_code) {
+        // New component without schema — clear any previous schema
+        onSchemaUpdate(null);
       }
     } catch (err) {
       setMessages((prev) => [

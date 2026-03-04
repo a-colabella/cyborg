@@ -7,6 +7,8 @@ export default function CanvasPage({
   setMessages,
   currentComponent,
   setCurrentComponent,
+  currentSchema,
+  setCurrentSchema,
   currentAppInfo,
   setCurrentAppInfo,
   isLoading,
@@ -57,10 +59,12 @@ export default function CanvasPage({
       <div style={{ width: `${splitPosition}%` }} className="h-full overflow-hidden">
         <CanvasPanel
           componentCode={currentComponent}
+          schema={currentSchema}
           appInfo={currentAppInfo}
           onAppInfoUpdate={setCurrentAppInfo}
           onClear={() => {
             setCurrentComponent(null);
+            setCurrentSchema(null);
             setCurrentAppInfo(null);
           }}
         />
@@ -78,6 +82,7 @@ export default function CanvasPage({
           messages={messages}
           setMessages={setMessages}
           onComponentUpdate={setCurrentComponent}
+          onSchemaUpdate={setCurrentSchema}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
         />

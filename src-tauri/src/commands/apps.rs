@@ -11,6 +11,8 @@ pub struct AppMetadata {
     pub description: Option<String>,
     pub icon: Option<String>,
     pub image_path: Option<String>,
+    #[serde(default)]
+    pub schema: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -20,6 +22,12 @@ pub struct AppInfo {
     pub name: String,
     pub filename: String,
     pub metadata: Option<AppMetadata>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LoadedApp {
+    pub code: String,
+    pub schema: Option<String>,
 }
 
 fn get_apps_dir(app: &AppHandle) -> Result<PathBuf, String> {
@@ -39,6 +47,7 @@ pub async fn save_app(
     description: Option<String>,
     icon: Option<String>,
     image_data: Option<String>,
+    schema: Option<String>,
 ) -> Result<String, String> {
     let apps_dir = get_apps_dir(&app)?;
     let sanitized = sanitize_filename(&name);
@@ -70,6 +79,7 @@ pub async fn save_app(
         description,
         icon,
         image_path,
+        schema,
         created_at: now.clone(),
         updated_at: now,
     };
@@ -81,10 +91,24 @@ pub async fn save_app(
 }
 
 #[tauri::command]
-pub async fn load_app(app: AppHandle, filename: String) -> Result<String, String> {
+pub async fn load_app(app: AppHandle, filename: String) -> Result<LoadedApp, String> {
     let apps_dir = get_apps_dir(&app)?;
     let path = apps_dir.join(&filename);
-    fs::read_to_string(&path).map_err(|e| e.to_string())
+    let code = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+
+    // Read schema from metadata sidecar
+    let stem = path.file_stem().unwrap().to_string_lossy().to_string();
+    let meta_path = apps_dir.join(format!("{}.json", stem));
+    let schema = if meta_path.exists() {
+        fs::read_to_string(&meta_path)
+            .ok()
+            .and_then(|s| serde_json::from_str::<AppMetadata>(&s).ok())
+            .and_then(|m| m.schema)
+    } else {
+        None
+    };
+
+    Ok(LoadedApp { code, schema })
 }
 
 #[tauri::command]
@@ -176,6 +200,7 @@ pub async fn update_app_metadata(
                     description: None,
                     icon: None,
                     image_path: None,
+                    schema: None,
                     created_at: now.clone(),
                     updated_at: now,
                 }
@@ -187,6 +212,7 @@ pub async fn update_app_metadata(
             description: None,
             icon: None,
             image_path: None,
+            schema: None,
             created_at: now.clone(),
             updated_at: now,
         }

@@ -5,7 +5,7 @@ import SaveDialog from './SaveDialog';
 import PhosphorIcon from './PhosphorIcon';
 import { ArrowLeftIcon, CoffeeIcon, FloppyDiskIcon, PaintBrushIcon, PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 
-export default function CanvasPanel({ componentCode, appInfo, onAppInfoUpdate, onClear }) {
+export default function CanvasPanel({ componentCode, schema, appInfo, onAppInfoUpdate, onClear }) {
   const [saving, setSaving] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -30,7 +30,14 @@ export default function CanvasPanel({ componentCode, appInfo, onAppInfoUpdate, o
     setShowSaveDialog(false);
     setSaving(true);
     try {
-      await invoke('save_app', { name, code: componentCode, description, icon, imageData });
+      await invoke('save_app', {
+        name,
+        code: componentCode,
+        description,
+        icon,
+        imageData,
+        schema: schema ? JSON.stringify(schema) : null,
+      });
     } catch (err) {
       console.error('Failed to save:', err);
     } finally {
@@ -157,7 +164,7 @@ export default function CanvasPanel({ componentCode, appInfo, onAppInfoUpdate, o
       {/* Render Area */}
       <div className="flex-1 overflow-auto p-4">
         {componentCode ? (
-          <ComponentRenderer code={componentCode} />
+          <ComponentRenderer code={componentCode} schema={schema} />
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4 text-text-secondary text-sm">
             <CoffeeIcon size={48} weight="regular" />

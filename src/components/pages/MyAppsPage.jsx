@@ -43,8 +43,9 @@ export default function MyAppsPage({ onLoadApp }) {
 
   const handleLoad = async (app) => {
     try {
-      const code = await invoke('load_app', { filename: app.filename });
-      onLoadApp(code, app);
+      const result = await invoke('load_app', { filename: app.filename });
+      const schema = result.schema ? JSON.parse(result.schema) : null;
+      onLoadApp(result.code, app, schema);
     } catch (err) {
       console.error('Failed to load app:', err);
     }
@@ -178,7 +179,7 @@ function AppCard({ app, imageUrl, onLoad, onEdit, onDelete }) {
   const iconName = app.metadata?.icon;
 
   return (
-    <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden hover:border-accent/50 transition-colors group">
+    <div className="bg-bg-secondary border border-border rounded-sm overflow-hidden hover:border-accent/50 transition-colors group">
       {/* Image / Icon area — clicking opens the app */}
       <div
         className="h-40 bg-bg-tertiary flex items-center justify-center cursor-pointer"
