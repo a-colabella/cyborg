@@ -1,16 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { ChatTextIcon, CheckCircleIcon, XCircleIcon } from '@phosphor-icons/react';
-import { SYSTEM_PROMPT } from '../systemPrompt';
 
 export default function ChatPanel({
   messages,
   setMessages,
-  onComponentUpdate,
-  onSchemaUpdate,
   isLoading,
   setIsLoading,
   appInfo,
@@ -20,15 +17,27 @@ export default function ChatPanel({
   onAccept,
   onDiscard,
   onClear,
+  agentStatus,
+  setAgentStatus,
+  streamingText,
+  setStreamingText,
 }) {
   const [accepting, setAccepting] = useState(false);
   const isEditingMode = appInfo != null;
   const displayName = appInfo?.metadata?.display_name || appInfo?.name || 'App';
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll when streaming text updates
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [streamingText, messages]);
 
   const handleSend = async (text) => {
     const userMessage = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+    setStreamingText(null);
+    setAgentStatus(null);
 
     try {
       const store = await load('settings.json', { autoSave: false });
@@ -50,53 +59,27 @@ export default function ChatPanel({
       }
 
       // Build the messages array for the AI
-      let aiMessages = [...messages, userMessage].map((m) => ({
+      const aiMessages = [...messages, userMessage].map((m) => ({
         role: m.role,
         content: m.content,
       }));
 
-      // In editing mode, prepend a context block with the current app code/schema
-      if (isEditingMode && currentCode) {
-        const schemaBlock = currentSchema
-          ? `\n\nCurrent schema:\n\`\`\`schema\n${JSON.stringify(currentSchema, null, 2)}\n\`\`\``
-          : '';
-        const contextMessage = {
-          role: 'user',
-          content: `[SYSTEM CONTEXT — CURRENT APP]\nThe user is editing "${displayName}". Current code and schema follow.\n\n\`\`\`jsx\n${currentCode}\n\`\`\`${schemaBlock}\n\nInstructions: Respond with the updated component. Always include a schema block if the current app has one. Do NOT use window.confirm(), window.alert(), or window.prompt(). Output the FULL component, not a diff.`,
-        };
-        aiMessages = [contextMessage, ...aiMessages];
-      }
-
-      const response = await invoke('chat', {
-        request: {
-          provider,
-          api_key: apiKey,
-          messages: aiMessages,
-          system_prompt: SYSTEM_PROMPT,
-        },
+      // Call the sidecar-based send_message command
+      // Always pass currentCode/currentSchema so the agent can modify
+      // whatever is on the canvas, even if it's not a saved app.
+      const responseText = await invoke('send_message', {
+        messages: aiMessages,
+        provider,
+        apiKey,
+        currentCode: currentCode || null,
+        currentSchema: currentSchema || null,
+        appName: isEditingMode ? displayName : null,
       });
 
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: response.content },
+        { role: 'assistant', content: responseText },
       ]);
-
-      if (response.component_code) {
-        onComponentUpdate(response.component_code);
-      }
-
-      if (response.schema) {
-        try {
-          const parsed = JSON.parse(response.schema);
-          onSchemaUpdate(parsed);
-        } catch (e) {
-          console.error('Failed to parse schema:', e);
-          onSchemaUpdate(null);
-        }
-      } else if (response.component_code) {
-        // New component without schema — clear any previous schema
-        onSchemaUpdate(null);
-      }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -104,6 +87,8 @@ export default function ChatPanel({
       ]);
     } finally {
       setIsLoading(false);
+      setStreamingText(null);
+      setAgentStatus(null);
     }
   };
 
@@ -129,12 +114,25 @@ export default function ChatPanel({
           <ChatMessage key={i} role={msg.role} content={msg.content} />
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-sm px-4 py-2.5 text-sm text-text-secondary">
-              Thinking...
-            </div>
+          <div className="flex flex-col gap-2">
+            {agentStatus && (
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                <span className="text-xs text-text-secondary">{agentStatus}</span>
+              </div>
+            )}
+            {streamingText ? (
+              <ChatMessage role="assistant" content={streamingText} />
+            ) : !agentStatus && (
+              <div className="flex justify-start">
+                <div className="bg-ai-bubble border border-border rounded-sm rounded-bl-sm px-4 py-2.5 text-sm text-text-secondary">
+                  Thinking...
+                </div>
+              </div>
+            )}
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Context Indicator Bar — visible when editing a saved app */}

@@ -1,7 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import ChatPanel from '../ChatPanel';
 import CanvasPanel from '../CanvasPanel';
+import { ensureTable } from '../../appDb';
 
 export default function CanvasPage({
   messages,
@@ -18,6 +20,8 @@ export default function CanvasPage({
   const [splitPosition, setSplitPosition] = useState(60);
   const [isDragging, setIsDragging] = useState(false);
   const [savedVersion, setSavedVersion] = useState(null);
+  const [agentStatus, setAgentStatus] = useState(null);
+  const [streamingText, setStreamingText] = useState(null);
   const containerRef = useRef(null);
 
   const isEditingMode = currentAppInfo != null;
@@ -33,6 +37,37 @@ export default function CanvasPage({
       setSavedVersion(null);
     }
   }, [currentAppInfo]);
+
+  // Listen for sidecar events
+  useEffect(() => {
+    const unlisten = [
+      listen('canvas_render', async (e) => {
+        const { code, schema, title } = e.payload;
+        // Set component code immediately so the canvas updates without waiting on DB
+        if (code) {
+          setCurrentComponent(code);
+        }
+        if (schema) {
+          try {
+            const parsed = typeof schema === 'string' ? JSON.parse(schema) : schema;
+            await ensureTable(parsed);
+            setCurrentSchema(parsed);
+          } catch (err) {
+            console.error('Failed to ensure table from canvas_render:', err);
+          }
+        } else {
+          setCurrentSchema(null);
+        }
+      }),
+      listen('agent_status', (e) => {
+        setAgentStatus(e.payload.status || null);
+      }),
+      listen('chat_stream_chunk', (e) => {
+        setStreamingText((prev) => (prev || '') + (e.payload.delta || ''));
+      }),
+    ];
+    return () => unlisten.forEach((p) => p.then((fn) => fn()));
+  }, []);
 
   const handleAccept = async () => {
     try {
@@ -118,8 +153,6 @@ export default function CanvasPage({
         <ChatPanel
           messages={messages}
           setMessages={setMessages}
-          onComponentUpdate={setCurrentComponent}
-          onSchemaUpdate={setCurrentSchema}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
           appInfo={currentAppInfo}
@@ -134,6 +167,10 @@ export default function CanvasPage({
             setCurrentAppInfo(null);
             setSavedVersion(null);
           }}
+          agentStatus={agentStatus}
+          setAgentStatus={setAgentStatus}
+          streamingText={streamingText}
+          setStreamingText={setStreamingText}
         />
       </div>
     </div>
