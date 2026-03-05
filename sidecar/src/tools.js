@@ -79,7 +79,7 @@ export function createTools() {
 
     render_component: tool({
       description:
-        'Render a React component on the canvas. Use this when the user wants to see, visualize, or interact with something. The component must be a self-contained function named "App" using inline styles. Optionally include a schema if the component needs persistent data.',
+        'Render a React component on the canvas. Use this when the user wants to see, visualize, or interact with something. The component must be a self-contained function named "App". ShadCN UI components are available via the UI object (e.g. UI.Button, UI.Card, UI.Input). Use inline styles for custom layout. Optionally include a schema if the component needs persistent data.',
       parameters: z.object({
         title: z.string().describe('Display title for the component'),
         code: z
