@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { load } from '@tauri-apps/plugin-store';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { ChatTextIcon, CheckCircleIcon, XCircleIcon } from '@phosphor-icons/react';
+import { ChatTextIcon, CheckCircleIcon, XCircleIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
 
 export default function ChatPanel({
   messages,
@@ -21,6 +21,8 @@ export default function ChatPanel({
   setAgentStatus,
   streamingText,
   setStreamingText,
+  collapsed,
+  onToggleCollapse,
 }) {
   const [accepting, setAccepting] = useState(false);
   const isEditingMode = appInfo != null;
@@ -95,9 +97,20 @@ export default function ChatPanel({
   return (
     <div className="flex flex-col h-full bg-bg-primary">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-        <ChatTextIcon size={18} weight="regular" className="text-text-secondary" />
-        <span className="text-sm font-semibold text-text-primary">Chat</span>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <ChatTextIcon size={18} weight="regular" className="text-text-secondary" />
+          <span className="text-sm font-semibold text-text-primary">Chat</span>
+        </div>
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-colors"
+            title="Collapse chat"
+          >
+            <SidebarSimpleIcon size={18} weight="regular" />
+          </button>
+        )}
       </div>
 
       {/* Message List */}
