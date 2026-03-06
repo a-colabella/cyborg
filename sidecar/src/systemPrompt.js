@@ -21,9 +21,10 @@ COMPONENT RULES (for render_component):
 - The component MUST be a function named "App".
 - Available in scope: React, useState, useEffect, useRef, useMemo, useCallback, useReducer, Fragment.
 - Recharts is available via the "Recharts" object (e.g. Recharts.BarChart, Recharts.LineChart, etc.).
+- ShadCN UI components are available via the "UI" object (e.g. UI.Button, UI.Card, UI.Input, UI.Table, UI.Tabs, UI.Dialog, etc.). All standard ShadCN component names, sub-components, and props are supported.
 - Do NOT use import statements — all dependencies are pre-injected.
-- Use inline styles for ALL styling (no Tailwind, no CSS modules).
-- Use a dark theme: background #1a1a1a, text #e0e0e0, accent #6366f1.
+- Use UI components for common elements (buttons, cards, inputs, tables, etc.). Use inline styles for custom layout and positioning.
+- Use a dark theme: background #1a1a1a, text #e0e0e0.
 - Font family: 'Space Grotesk, system-ui, sans-serif'.
 - The component must be completely self-contained.
 

@@ -8,8 +8,9 @@ RULES FOR GENERATED COMPONENTS:
 - The component MUST be a function named "App"
 - You have access to: React, useState, useEffect, useRef, useMemo, useCallback, useReducer, Fragment
 - You have access to Recharts via the "Recharts" object: Recharts.LineChart, Recharts.BarChart, Recharts.PieChart, Recharts.XAxis, Recharts.YAxis, Recharts.CartesianGrid, Recharts.Tooltip, Recharts.Legend, Recharts.Line, Recharts.Bar, Recharts.Pie, Recharts.Cell, Recharts.Area, Recharts.AreaChart, Recharts.ResponsiveContainer, etc.
+- You have access to ShadCN UI components via the "UI" object (e.g. UI.Button, UI.Card, UI.Input, UI.Table, UI.Tabs, UI.Dialog, etc.). All standard ShadCN component names, sub-components, and props work as documented. Available: Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Input, Textarea, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Checkbox, Switch, Slider, RadioGroup, RadioGroupItem, Tabs, TabsList, TabsTrigger, TabsContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, Alert, AlertTitle, AlertDescription, Badge, Progress, Separator, Tooltip, TooltipProvider, TooltipTrigger, TooltipContent, Accordion, AccordionItem, AccordionTrigger, AccordionContent, Avatar, AvatarImage, AvatarFallback, ScrollArea, Skeleton, Popover, PopoverTrigger, PopoverContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel.
 - Do NOT use import statements - all dependencies are pre-injected into scope
-- Use inline styles for all styling (Tailwind is NOT available in the component sandbox)
+- Use UI components for common elements (buttons, cards, inputs, tables, etc.). Use inline styles for custom layout and positioning.
 - The component must be completely self-contained
 - Use a dark theme (background: #1a1a1a, text: #e0e0e0)
 - Keep it clean and visually polished

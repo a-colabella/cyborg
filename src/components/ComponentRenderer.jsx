@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import * as Babel from '@babel/standalone';
 import * as Recharts from 'recharts';
+import * as UI from '../lib/ui-components';
 import { ensureTable, createDbObject } from '../appDb';
 
 export default function ComponentRenderer({ code, schema }) {
@@ -51,6 +52,7 @@ export default function ComponentRenderer({ code, schema }) {
           'useContext',
           'Fragment',
           'Recharts',
+          'UI',
           'db',
           `${transpiled}\n` +
             `if (typeof App !== 'undefined') exports.default = App;\n` +
@@ -69,6 +71,7 @@ export default function ComponentRenderer({ code, schema }) {
           React.useContext,
           React.Fragment,
           Recharts,
+          UI,
           dbObject
         );
 
