@@ -4,6 +4,7 @@ import { listen } from '@tauri-apps/api/event';
 import ChatPanel from '../ChatPanel';
 import CanvasPanel from '../CanvasPanel';
 import { ensureTable } from '../../appDb';
+import { SidebarIcon } from '@phosphor-icons/react';
 
 export default function CanvasPage({
   messages,
@@ -19,6 +20,15 @@ export default function CanvasPage({
 }) {
   const [splitPosition, setSplitPosition] = useState(60);
   const [isDragging, setIsDragging] = useState(false);
+  const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [splitBeforeCollapse, setSplitBeforeCollapse] = useState(60);
+
+  const toggleChatCollapsed = useCallback(() => {
+    setChatCollapsed((prev) => {
+      if (!prev) setSplitBeforeCollapse(splitPosition);
+      return !prev;
+    });
+  }, [splitPosition]);
   const [savedVersion, setSavedVersion] = useState(null);
   const [agentStatus, setAgentStatus] = useState(null);
   const [streamingText, setStreamingText] = useState(null);
@@ -123,11 +133,14 @@ export default function CanvasPage({
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full select-none"
+      className="flex h-full w-full select-none relative"
       style={{ cursor: isDragging ? 'col-resize' : 'default' }}
     >
       {/* Canvas Panel — LEFT */}
-      <div style={{ width: `${splitPosition}%` }} className="h-full overflow-hidden">
+      <div
+        style={{ width: chatCollapsed ? '100%' : `${splitPosition}%` }}
+        className="h-full overflow-hidden transition-all duration-200"
+      >
         <CanvasPanel
           componentCode={currentComponent}
           schema={currentSchema}
@@ -143,13 +156,18 @@ export default function CanvasPage({
       </div>
 
       {/* Draggable Divider */}
-      <div
-        className="w-1 bg-border hover:bg-accent cursor-col-resize transition-colors flex-shrink-0"
-        onMouseDown={handleMouseDown}
-      />
+      {!chatCollapsed && (
+        <div
+          className="w-1 bg-border hover:bg-accent cursor-col-resize transition-colors flex-shrink-0"
+          onMouseDown={handleMouseDown}
+        />
+      )}
 
       {/* Chat Panel — RIGHT */}
-      <div style={{ width: `${100 - splitPosition}%` }} className="h-full overflow-hidden">
+      <div
+        style={{ width: chatCollapsed ? '0%' : `${100 - splitPosition}%` }}
+        className={`h-full overflow-hidden transition-all duration-200 ${chatCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      >
         <ChatPanel
           messages={messages}
           setMessages={setMessages}
@@ -171,8 +189,21 @@ export default function CanvasPage({
           setAgentStatus={setAgentStatus}
           streamingText={streamingText}
           setStreamingText={setStreamingText}
+          collapsed={chatCollapsed}
+          onToggleCollapse={toggleChatCollapsed}
         />
       </div>
+
+      {/* Expand button — shown when chat is collapsed */}
+      {chatCollapsed && (
+        <button
+          onClick={toggleChatCollapsed}
+          className="absolute top-3 right-3 p-1.5 rounded-md bg-bg-secondary border border-border text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-colors z-10"
+          title="Expand chat"
+        >
+          <SidebarIcon size={18} weight="regular" />
+        </button>
+      )}
     </div>
   );
 }
